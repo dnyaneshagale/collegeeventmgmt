@@ -23,10 +23,14 @@ public class Event {
     private LocalDateTime endTime;
     private String venue;
     private int capacity;
+
+    @Builder.Default
     private boolean approved = false;
-    private String organizer; // e.g., faculty name or dept
+
+    private String organizer;
 
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
+    @Builder.Default
     private Set<EventRegistration> registrations = new HashSet<>();
 }

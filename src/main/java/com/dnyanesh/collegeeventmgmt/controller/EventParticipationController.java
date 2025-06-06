@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/events")
+@RequestMapping("/api/participation/events") // <-- CHANGED
 @RequiredArgsConstructor
 public class EventParticipationController {
 

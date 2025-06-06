@@ -21,6 +21,7 @@ public class EventRegistration {
     @ManyToOne
     private User user;
 
+    @Builder.Default
     private LocalDateTime registrationDate = LocalDateTime.now();
 
     private String feedback;
