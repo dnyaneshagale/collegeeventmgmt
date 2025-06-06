@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/participation/events") // <-- CHANGED
+@RequestMapping("/api/participation/events")
 @RequiredArgsConstructor
 public class EventParticipationController {
 
@@ -65,7 +65,7 @@ public class EventParticipationController {
             @RequestBody Map<String, String> payload,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
-        String feedback = payload.get("feedback");
+        String feedback = payload != null ? payload.get("feedback") : null;
         return ResponseEntity.ok(
                 participationService.submitFeedback(eventId, userDetails.getUsername(), feedback)
         );

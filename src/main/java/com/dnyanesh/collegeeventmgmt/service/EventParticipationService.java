@@ -9,7 +9,6 @@ import com.dnyanesh.collegeeventmgmt.repository.EventRegistrationRepository;
 import com.dnyanesh.collegeeventmgmt.repository.EventRepository;
 import com.dnyanesh.collegeeventmgmt.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -26,6 +25,8 @@ public class EventParticipationService {
 
     // List all events (optionally filter for upcoming/past)
     public List<EventDto> listEvents(String filter) {
+        // Defensive: Never allow null to propagate, avoids NPE in frameworks using hashCode
+        if (filter == null) filter = "";
         LocalDateTime now = LocalDateTime.now();
         List<Event> events = switch (filter) {
             case "upcoming" -> eventRepository.findAll().stream()
