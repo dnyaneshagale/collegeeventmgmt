@@ -4,8 +4,14 @@ import com.dnyanesh.collegeeventmgmt.dto.EventDto;
 import com.dnyanesh.collegeeventmgmt.model.Event;
 import com.dnyanesh.collegeeventmgmt.repository.EventRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -14,6 +20,28 @@ import java.util.stream.Collectors;
 public class EventService {
 
     private final EventRepository eventRepository;
+
+    @Value("${event.images.upload-dir:uploads/event-images/}")
+    private String uploadDir;
+
+    public String saveEventImage(Long eventId, MultipartFile file) {
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new RuntimeException("Event not found"));
+
+        try {
+            Files.createDirectories(Paths.get(uploadDir));
+            String fileName = eventId + "_" + System.currentTimeMillis() + "_" + file.getOriginalFilename();
+            Path filePath = Paths.get(uploadDir, fileName);
+            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+            event.setImagePath(fileName);
+            eventRepository.save(event);
+            // Return API url for image
+            return "/api/events/image/" + fileName;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to upload image", e);
+        }
+    }
 
     public EventDto createEvent(EventDto dto) {
         Event event = Event.builder()
@@ -67,6 +95,7 @@ public class EventService {
                 .capacity(event.getCapacity())
                 .organizer(event.getOrganizer())
                 .approved(event.isApproved())
+                .imageUrl(event.getImagePath() != null ? "/api/events/image/" + event.getImagePath() : null)
                 .build();
     }
 

@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import java.time.LocalDateTime;
 
 @Data
@@ -21,4 +20,5 @@ public class EventDto {
     private int capacity;
     private boolean approved;
     private String organizer;
+    private String imageUrl; // New field
 }

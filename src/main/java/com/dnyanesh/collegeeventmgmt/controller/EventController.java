@@ -2,9 +2,16 @@ package com.dnyanesh.collegeeventmgmt.controller;
 
 import com.dnyanesh.collegeeventmgmt.dto.EventDto;
 import com.dnyanesh.collegeeventmgmt.service.EventService;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 @RestController
@@ -50,5 +57,31 @@ public class EventController {
     public ResponseEntity<Void> deleteEvent(@PathVariable Long id) {
         eventService.deleteEvent(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{eventId}/image")
+    @PreAuthorize("hasAnyRole('ADMIN','FACULTY','STUDENT')")
+    public ResponseEntity<?> uploadEventImage(
+            @PathVariable Long eventId,
+            @RequestParam("file") MultipartFile file) {
+        String imageUrl = eventService.saveEventImage(eventId, file);
+        return ResponseEntity.ok().body(java.util.Map.of("imageUrl", imageUrl));
+    }
+
+    @GetMapping("/image/{filename:.+}")
+    @PreAuthorize("hasAnyRole('ADMIN','FACULTY','STUDENT')")
+    public ResponseEntity<Resource> getEventImage(@PathVariable String filename) {
+        try {
+            Path filePath = Paths.get("uploads/event-images/").resolve(filename).normalize();
+            Resource resource = new UrlResource(filePath.toUri());
+            if (!resource.exists()) {
+                return ResponseEntity.notFound().build();
+            }
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + resource.getFilename() + "\"")
+                    .body(resource);
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 }
