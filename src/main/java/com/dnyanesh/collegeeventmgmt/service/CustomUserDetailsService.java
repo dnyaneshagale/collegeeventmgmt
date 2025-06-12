@@ -1,4 +1,4 @@
-package com.dnyanesh.collegeeventmgmt.security;
+package com.dnyanesh.collegeeventmgmt.service;
 
 import com.dnyanesh.collegeeventmgmt.model.User;
 import com.dnyanesh.collegeeventmgmt.repository.UserRepository;

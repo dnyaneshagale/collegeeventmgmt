@@ -1,6 +1,6 @@
 package com.dnyanesh.collegeeventmgmt.config;
 
-import com.dnyanesh.collegeeventmgmt.security.CustomUserDetailsService;
+import com.dnyanesh.collegeeventmgmt.service.CustomUserDetailsService;
 import com.dnyanesh.collegeeventmgmt.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;

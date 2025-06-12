@@ -1,5 +1,6 @@
 package com.dnyanesh.collegeeventmgmt.security;
 
+import com.dnyanesh.collegeeventmgmt.service.CustomUserDetailsService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
