@@ -2,6 +2,7 @@ package com.dnyanesh.collegeeventmgmt.controller;
 
 import com.dnyanesh.collegeeventmgmt.dto.UserDto;
 import com.dnyanesh.collegeeventmgmt.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -28,7 +29,7 @@ public class UserController {
     @PutMapping("/me")
     public ResponseEntity<UserDto> updateCurrentUser(
             @AuthenticationPrincipal UserDetails userDetails,
-            @RequestBody UserDto userDto) {
+            @Valid @RequestBody UserDto userDto) {
         return ResponseEntity.ok(userService.updateCurrentUser(userDetails.getUsername(), userDto));
     }
 

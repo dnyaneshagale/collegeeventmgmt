@@ -2,6 +2,7 @@ package com.dnyanesh.collegeeventmgmt.controller;
 
 import com.dnyanesh.collegeeventmgmt.dto.UserDto;
 import com.dnyanesh.collegeeventmgmt.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -18,6 +19,11 @@ public class AdminController {
 
     private final UserService userService;
 
+    @GetMapping("/hello")
+    public String sayHello() {
+        return "Hello Admin";
+    }
+
     @GetMapping("/users")
     public List<UserDto> getAllUsers() {
         return userService.getAllUsers();
@@ -29,7 +35,7 @@ public class AdminController {
     }
 
     @PutMapping("/users/{id}")
-    public UserDto updateUser(@PathVariable UUID id, @RequestBody UserDto userDto) {
+    public UserDto updateUser(@PathVariable UUID id,@Valid @RequestBody UserDto userDto) {
         return userService.updateUserById(id, userDto);
     }
 
