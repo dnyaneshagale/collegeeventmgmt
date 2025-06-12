@@ -29,6 +29,11 @@ public class EventController {
         return ResponseEntity.ok(eventService.getAllEvents());
     }
 
+    @GetMapping("/approved")
+    public ResponseEntity<List<EventDto>> getApprovedEvents() {
+        return ResponseEntity.ok(eventService.getApprovedEvents());
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<EventDto> getEventById(@PathVariable Long id) {
         EventDto event = eventService.getEvent(id);
@@ -81,6 +86,30 @@ public class EventController {
                     .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + resource.getFilename() + "\"")
                     .body(resource);
         } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    // Approve event (admin/faculty only)
+    @PutMapping("/{id}/approve")
+    @PreAuthorize("hasAnyRole('ADMIN','FACULTY')")
+    public ResponseEntity<EventDto> approveEvent(@PathVariable Long id) {
+        try {
+            EventDto approved = eventService.approveEvent(id);
+            return ResponseEntity.ok(approved);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    // Reject event (admin/faculty only)
+    @PutMapping("/{id}/reject")
+    @PreAuthorize("hasAnyRole('ADMIN','FACULTY')")
+    public ResponseEntity<EventDto> rejectEvent(@PathVariable Long id) {
+        try {
+            EventDto rejected = eventService.rejectEvent(id);
+            return ResponseEntity.ok(rejected);
+        } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
     }
