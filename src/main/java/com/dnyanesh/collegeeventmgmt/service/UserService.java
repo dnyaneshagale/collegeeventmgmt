@@ -2,10 +2,14 @@ package com.dnyanesh.collegeeventmgmt.service;
 
 import com.dnyanesh.collegeeventmgmt.dto.UserDto;
 import com.dnyanesh.collegeeventmgmt.model.User;
+import com.dnyanesh.collegeeventmgmt.model.Role;
 import com.dnyanesh.collegeeventmgmt.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -63,5 +67,38 @@ public class UserService {
                 .email(user.getEmail())
                 .role(user.getRole().name())
                 .build();
+    }
+
+    // ADMIN: Get all users
+    public List<UserDto> getAllUsers() {
+        return userRepository.findAll()
+                .stream()
+                .map(this::toDto)
+                .toList();
+    }
+
+    // ADMIN: Get user by ID
+    public UserDto getUserById(UUID id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return toDto(user);
+    }
+
+    // ADMIN: Update user by ID (can update full name, email, role)
+    public UserDto updateUserById(UUID id, UserDto userDto) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        user.setFullName(userDto.getFullName());
+        user.setEmail(userDto.getEmail());
+        user.setRole(Role.valueOf(userDto.getRole()));
+        return toDto(userRepository.save(user));
+    }
+
+    // ADMIN: Delete user by ID
+    public void deleteUserById(UUID id) {
+        if (!userRepository.existsById(id)) {
+            throw new RuntimeException("User not found");
+        }
+        userRepository.deleteById(id);
     }
 }
