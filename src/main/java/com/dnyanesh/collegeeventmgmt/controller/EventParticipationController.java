@@ -2,6 +2,7 @@ package com.dnyanesh.collegeeventmgmt.controller;
 
 import com.dnyanesh.collegeeventmgmt.dto.EventDto;
 import com.dnyanesh.collegeeventmgmt.dto.EventRegistrationDto;
+import com.dnyanesh.collegeeventmgmt.exception.ResourceNotFoundException;
 import com.dnyanesh.collegeeventmgmt.service.EventParticipationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -20,21 +21,20 @@ public class EventParticipationController {
 
     private final EventParticipationService participationService;
 
-    // List events, with optional filter (?filter=upcoming/past)
     @GetMapping
     public ResponseEntity<List<EventDto>> listEvents(@RequestParam(required = false) String filter) {
         return ResponseEntity.ok(participationService.listEvents(filter));
     }
 
-    // Get event details
     @GetMapping("/{eventId}")
     public ResponseEntity<EventDto> getEvent(@PathVariable Long eventId) {
         EventDto event = participationService.getEventDetails(eventId);
-        if (event == null) return ResponseEntity.notFound().build();
+        if (event == null) {
+            throw new ResourceNotFoundException("Event not found with id: " + eventId);
+        }
         return ResponseEntity.ok(event);
     }
 
-    // Register for event
     @PostMapping("/{eventId}/register")
     @PreAuthorize("hasAnyRole('STUDENT','FACULTY')")
     public ResponseEntity<EventRegistrationDto> registerForEvent(
@@ -46,7 +46,6 @@ public class EventParticipationController {
         );
     }
 
-    // Get registered events for current user
     @GetMapping("/registered")
     @PreAuthorize("hasAnyRole('STUDENT','FACULTY')")
     public ResponseEntity<List<EventRegistrationDto>> getRegisteredEvents(
@@ -57,7 +56,6 @@ public class EventParticipationController {
         );
     }
 
-    // Submit feedback for event
     @PostMapping("/{eventId}/feedback")
     @PreAuthorize("hasAnyRole('STUDENT','FACULTY')")
     public ResponseEntity<EventRegistrationDto> submitFeedback(

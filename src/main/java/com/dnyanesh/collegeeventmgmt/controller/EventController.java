@@ -1,6 +1,7 @@
 package com.dnyanesh.collegeeventmgmt.controller;
 
 import com.dnyanesh.collegeeventmgmt.dto.EventDto;
+import com.dnyanesh.collegeeventmgmt.exception.ResourceNotFoundException;
 import com.dnyanesh.collegeeventmgmt.service.EventService;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -38,7 +39,7 @@ public class EventController {
     public ResponseEntity<EventDto> getEventById(@PathVariable Long id) {
         EventDto event = eventService.getEvent(id);
         if (event == null) {
-            return ResponseEntity.notFound().build();
+            throw new ResourceNotFoundException("Event not found with id: " + id);
         }
         return ResponseEntity.ok(event);
     }
@@ -50,17 +51,19 @@ public class EventController {
 
     @PutMapping("/{id}")
     public ResponseEntity<EventDto> updateEvent(@PathVariable Long id, @RequestBody EventDto eventDto) {
-        try {
-            EventDto updated = eventService.updateEvent(id, eventDto);
-            return ResponseEntity.ok(updated);
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
+        EventDto updatedEvent = eventService.updateEvent(id, eventDto);
+        if (updatedEvent == null) {
+            throw new ResourceNotFoundException("Event not found with id: " + id);
         }
+        return ResponseEntity.ok(updatedEvent);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteEvent(@PathVariable Long id) {
-        eventService.deleteEvent(id);
+        boolean deleted = eventService.deleteEvent(id);
+        if (!deleted) {
+            throw new ResourceNotFoundException("Event not found with id: " + id);
+        }
         return ResponseEntity.noContent().build();
     }
 
@@ -80,37 +83,33 @@ public class EventController {
             Path filePath = Paths.get("uploads/event-images/").resolve(filename).normalize();
             Resource resource = new UrlResource(filePath.toUri());
             if (!resource.exists()) {
-                return ResponseEntity.notFound().build();
+                throw new ResourceNotFoundException("Image not found with filename: " + filename);
             }
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + resource.getFilename() + "\"")
                     .body(resource);
         } catch (Exception e) {
-            return ResponseEntity.notFound().build();
+            throw new ResourceNotFoundException("Image not found with filename: " + filename);
         }
     }
 
-    // Approve event (admin/faculty only)
     @PutMapping("/{id}/approve")
     @PreAuthorize("hasAnyRole('ADMIN','FACULTY')")
     public ResponseEntity<EventDto> approveEvent(@PathVariable Long id) {
-        try {
-            EventDto approved = eventService.approveEvent(id);
-            return ResponseEntity.ok(approved);
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
+        EventDto approved = eventService.approveEvent(id);
+        if (approved == null) {
+            throw new ResourceNotFoundException("Event not found with id: " + id);
         }
+        return ResponseEntity.ok(approved);
     }
 
-    // Reject event (admin/faculty only)
     @PutMapping("/{id}/reject")
     @PreAuthorize("hasAnyRole('ADMIN','FACULTY')")
     public ResponseEntity<EventDto> rejectEvent(@PathVariable Long id) {
-        try {
-            EventDto rejected = eventService.rejectEvent(id);
-            return ResponseEntity.ok(rejected);
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
+        EventDto rejected = eventService.rejectEvent(id);
+        if (rejected == null) {
+            throw new ResourceNotFoundException("Event not found with id: " + id);
         }
+        return ResponseEntity.ok(rejected);
     }
 }

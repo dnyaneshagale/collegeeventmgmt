@@ -1,6 +1,7 @@
 package com.dnyanesh.collegeeventmgmt.controller;
 
 import com.dnyanesh.collegeeventmgmt.dto.EventDto;
+import com.dnyanesh.collegeeventmgmt.exception.ResourceNotFoundException;
 import com.dnyanesh.collegeeventmgmt.model.Event;
 import com.dnyanesh.collegeeventmgmt.model.EventRegistration;
 import com.dnyanesh.collegeeventmgmt.repository.EventRegistrationRepository;
@@ -25,58 +26,61 @@ public class AdminEventController {
     private final EventService eventService;
     private final EventRegistrationRepository registrationRepository;
 
-    // Create Event
     @PostMapping
     public ResponseEntity<EventDto> createEvent(@RequestBody EventDto dto) {
         return ResponseEntity.ok(eventService.createEvent(dto));
     }
 
-    // List All Events
     @GetMapping
     public ResponseEntity<List<EventDto>> getAllEvents() {
         return ResponseEntity.ok(eventService.getAllEvents());
     }
 
-    // Get Event by ID
     @GetMapping("/{id}")
     public ResponseEntity<EventDto> getEvent(@PathVariable Long id) {
         EventDto event = eventService.getEvent(id);
-        if (event == null) return ResponseEntity.notFound().build();
+        if (event == null) {
+            throw new ResourceNotFoundException("Event not found with id: " + id);
+        }
         return ResponseEntity.ok(event);
     }
 
-    // Update Event
     @PutMapping("/{id}")
     public ResponseEntity<EventDto> updateEvent(@PathVariable Long id, @RequestBody EventDto dto) {
-        return ResponseEntity.ok(eventService.updateEvent(id, dto));
+        EventDto updatedEvent = eventService.updateEvent(id, dto);
+        if (updatedEvent == null) {
+            throw new ResourceNotFoundException("Event not found with id: " + id);
+        }
+        return ResponseEntity.ok(updatedEvent);
     }
 
-    // Delete Event
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteEvent(@PathVariable Long id) {
-        eventService.deleteEvent(id);
+        boolean deleted = eventService.deleteEvent(id);
+        if (!deleted) {
+            throw new ResourceNotFoundException("Event not found with id: " + id);
+        }
         return ResponseEntity.ok().build();
     }
 
-    // View Registrations for an Event
     @GetMapping("/{id}/registrations")
     public ResponseEntity<List<String>> getRegistrations(@PathVariable Long id) {
         Event event = eventService.getEventEntity(id);
-        if (event == null) return ResponseEntity.notFound().build();
+        if (event == null) {
+            throw new ResourceNotFoundException("Event not found with id: " + id);
+        }
         List<String> participants = registrationRepository.findByEvent(event)
                 .stream()
-                .map(reg -> reg.getUser().getEmail()) // You can add more info if needed
+                .map(reg -> reg.getUser().getEmail())
                 .collect(Collectors.toList());
         return ResponseEntity.ok(participants);
     }
 
-    // Download Participants as CSV
     @GetMapping("/{id}/participants/csv")
     public void downloadParticipantsCsv(@PathVariable Long id, HttpServletResponse response) throws IOException {
         Event event = eventService.getEventEntity(id);
         if (event == null) {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            return;
+            throw new ResourceNotFoundException("Event not found with id: " + id);
         }
         List<EventRegistration> registrations = registrationRepository.findByEvent(event);
 

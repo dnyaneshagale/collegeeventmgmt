@@ -50,7 +50,7 @@ public class UserService {
         return toDto(userRepository.save(user));
     }
 
-    public void updatePassword(String email, String currentPassword, String newPassword) {
+    public boolean updatePassword(String email, String currentPassword, String newPassword) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
@@ -58,6 +58,8 @@ public class UserService {
         }
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
+
+        return true;
     }
 
     private UserDto toDto(User user) {
@@ -95,10 +97,12 @@ public class UserService {
     }
 
     // ADMIN: Delete user by ID
-    public void deleteUserById(UUID id) {
+    public boolean deleteUserById(UUID id) {
         if (!userRepository.existsById(id)) {
             throw new RuntimeException("User not found");
         }
         userRepository.deleteById(id);
+
+        return true;
     }
 }

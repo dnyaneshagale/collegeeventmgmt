@@ -1,6 +1,7 @@
 package com.dnyanesh.collegeeventmgmt.controller;
 
 import com.dnyanesh.collegeeventmgmt.dto.UserDto;
+import com.dnyanesh.collegeeventmgmt.exception.ResourceNotFoundException;
 import com.dnyanesh.collegeeventmgmt.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -15,42 +16,54 @@ import java.util.Map;
 public class UserController {
 
     private final UserService userService;
+
     public UserController(UserService userService) {
         this.userService = userService;
     }
 
-    // Get current user profile
     @GetMapping("/me")
     public ResponseEntity<UserDto> getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
-        return ResponseEntity.ok(userService.getCurrentUser(userDetails.getUsername()));
+        UserDto currentUser = userService.getCurrentUser(userDetails.getUsername());
+        if (currentUser == null) {
+            throw new ResourceNotFoundException("Current user not found");
+        }
+        return ResponseEntity.ok(currentUser);
     }
 
-    // Update current user profile (fullName only)
     @PutMapping("/me")
     public ResponseEntity<UserDto> updateCurrentUser(
             @AuthenticationPrincipal UserDetails userDetails,
             @Valid @RequestBody UserDto userDto) {
-        return ResponseEntity.ok(userService.updateCurrentUser(userDetails.getUsername(), userDto));
+        UserDto updatedUser = userService.updateCurrentUser(userDetails.getUsername(), userDto);
+        if (updatedUser == null) {
+            throw new ResourceNotFoundException("Current user not found");
+        }
+        return ResponseEntity.ok(updatedUser);
     }
 
-    // Update email (with password confirmation)
     @PutMapping("/me/email")
     public ResponseEntity<UserDto> updateEmail(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody Map<String, String> request) {
         String newEmail = request.get("email");
-        String password = request.get("password"); // Optional, but recommended
-        return ResponseEntity.ok(userService.updateEmail(userDetails.getUsername(), newEmail, password));
+        String password = request.get("password");
+        UserDto updatedEmailUser = userService.updateEmail(userDetails.getUsername(), newEmail, password);
+        if (updatedEmailUser == null) {
+            throw new ResourceNotFoundException("Current user not found");
+        }
+        return ResponseEntity.ok(updatedEmailUser);
     }
 
-    // Update password
     @PutMapping("/me/password")
     public ResponseEntity<?> updatePassword(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody Map<String, String> request) {
         String currentPassword = request.get("currentPassword");
         String newPassword = request.get("newPassword");
-        userService.updatePassword(userDetails.getUsername(), currentPassword, newPassword);
+        boolean updated = userService.updatePassword(userDetails.getUsername(), currentPassword, newPassword);
+        if (!updated) {
+            throw new ResourceNotFoundException("Current user not found");
+        }
         return ResponseEntity.ok().body(Map.of("message", "Password updated successfully"));
     }
 }

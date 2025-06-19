@@ -138,13 +138,17 @@ public class EventService {
     }
 
     // Delete event and its image file if present
-    public void deleteEvent(Long id) {
+    public boolean deleteEvent(Long id) {
         Event event = eventRepository.findById(id).orElse(null);
         if (event != null && event.getImagePath() != null) {
             Path imagePath = Paths.get(uploadDir, event.getImagePath());
-            try { Files.deleteIfExists(imagePath); } catch (Exception ignored) {}
+            try {
+                Files.deleteIfExists(imagePath);
+            } catch (Exception ignored) {}
         }
         eventRepository.deleteById(id);
+
+        return true;
     }
 
     private EventDto toDto(Event event) {
