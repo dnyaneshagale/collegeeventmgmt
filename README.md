@@ -22,7 +22,6 @@ The College Event Management System is a Spring Boot-based application designed 
 - **Backend**: Java, Spring Boot
 - **Security**: Spring Security, JWT
 - **Database**: PostgreSQL
-- **API Documentation**: Swagger/OpenAPI (to be integrated)
 - **Build Tool**: Maven
 
 ---
@@ -66,7 +65,7 @@ Ensure you have the following installed:
 ## Testing
 
 ### API Testing
-You can test the APIs using Postman or cURL. Once Swagger is integrated, you can use the Swagger UI for API testing.
+You can test the APIs using Postman or cURL.
 
 ### Unit Tests
 Run the unit tests using:
